@@ -23,7 +23,7 @@
 
    esp8266 connections
    gpio  0 - button
-   gpio 12 - relay
+   gpio 12 - relaye
    gpio 13 - green led - active low
    gpio 14 - pin 5 on header
 
@@ -69,6 +69,7 @@ const int CMD_BUTTON_CHANGE = 1;
 int cmd = CMD_WAIT;
 
 const int CMD_INPUT_CHANGE = 1;
+const int CMD_INPUT_PRESSED = 2;
 int cmd_inp = CMD_WAIT;
 
 int relayState = relStateOFF;
@@ -121,6 +122,11 @@ void toggleState() {
 
 void toggleInput() {
   cmd_inp = CMD_INPUT_CHANGE;
+}
+
+void setInputPressed() {
+  cmd_inp = CMD_INPUT_PRESSED;
+  InputState = inpStatePressed;
 }
 
 void toggle() {
@@ -181,7 +187,7 @@ void BellStart() {
   turnOn();
 
   // start Ticker to turn off Bell Relay
-  TickerBell.attachms(800, BellStop);
+  TickerBell.attach_ms(700, BellStop);
 
   client.publish(mqtt_pubtopic_bell, "1", true);
 
@@ -247,7 +253,8 @@ void setup()
   //setup input
   pinMode(SONOFF_INPUT, INPUT_PULLUP);
   InputState = digitalRead(SONOFF_INPUT);
-  attachInterrupt(SONOFF_INPUT, toggleInput, CHANGE);
+  //attachInterrupt(SONOFF_INPUT, toggleInput, CHANGE);
+  attachInterrupt(SONOFF_INPUT, setInputPressed, FALLING);
 
   init_mqtt(callback_mqtt);
 
@@ -270,32 +277,44 @@ void loop()
     BellTurnOff();
   }
 
-  // Button pressed -> start Bell
+  //  // Button pressed -> start Bell
   switch (cmd_inp) {
     case CMD_WAIT:
       break;
     case CMD_INPUT_CHANGE:
-      int currentStateInp = digitalRead(PIN_INPUT);
-      if (currentStateInp != InputState) {
-        if (currentStateInp == inpStatePressed) {
-          BellStart();
-        }
-        InputState = currentStateInp;
+      {
+        cmd_inp = CMD_WAIT;
+        int currentStateInp = digitalRead(PIN_INPUT);
+        if (currentStateInp != InputState) {
+          InputState = currentStateInp;
 
-        if (InputState == inpStatePressed) {
-          //client.publish(mqtt_pubtopic_wl, "0", true);
+          if (InputState == inpStatePressed) {
+            BellStart();
+          }
+
+          if (InputState == inpStatePressed) {
+            //client.publish(mqtt_pubtopic_wl, "0", true);
+          }
+          else {
+            //client.publish(mqtt_pubtopic_wl, "1", true);
+          }
         }
-        else {
-          //client.publish(mqtt_pubtopic_wl, "1", true);
-        }
-        break;
       }
+      break;
+    case CMD_INPUT_PRESSED:
+      {
+        cmd_inp = CMD_WAIT;
+        BellStart();
+      }
+      break;
   }
+
 
   switch (cmd) {
     case CMD_WAIT:
       break;
     case CMD_BUTTON_CHANGE:
+      cmd = CMD_WAIT;
       int currentState = digitalRead(SONOFF_BUTTON);
       if (currentState != buttonState) {
         if (buttonState == LOW && currentState == HIGH) {
