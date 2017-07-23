@@ -181,7 +181,7 @@ void BellStart() {
   turnOn();
 
   // start Ticker to turn off Bell Relay
-  TickerBell.attach(1, BellStop);
+  TickerBell.attachms(800, BellStop);
 
   client.publish(mqtt_pubtopic_bell, "1", true);
 
