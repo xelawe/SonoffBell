@@ -53,16 +53,17 @@
 #define inpStatePressed LOW // Button pressed
 #define inpStateReleased HIGH // Button relesaed
 
-#include "wifi_tool.h"
-#include "ota_tool.h"
+#include "cy_wifi.h"
+#include "cy_ota.h"
 #include "mqtt_tool.h"
-#include <ArduinoOTA.h>
+//#include <ArduinoOTA.h>
 
 //for LED status
 #include <Ticker.h>
 Ticker ticker;
 Ticker TickerBell;
 
+const char* gv_hostname = "SonoffBell";
 
 const int CMD_WAIT = 0;
 const int CMD_BUTTON_CHANGE = 1;
@@ -234,11 +235,9 @@ void setup()
   // start ticker with 0.5 because we start in AP mode and try to connect
   ticker.attach(0.6, tick);
 
-  char *hostname = "SonoffBell";
+  wifi_init(gv_hostname);
 
-  wifi_init(hostname);
-
-  init_ota(hostname);
+  init_ota(gv_hostname);
 
   //if you get here you have connected to the WiFi
   ticker.detach();
@@ -283,7 +282,6 @@ void loop()
       break;
     case CMD_INPUT_CHANGE:
       {
-        cmd_inp = CMD_WAIT;
         int currentStateInp = digitalRead(PIN_INPUT);
         if (currentStateInp != InputState) {
           InputState = currentStateInp;
@@ -299,12 +297,13 @@ void loop()
             //client.publish(mqtt_pubtopic_wl, "1", true);
           }
         }
+        cmd_inp = CMD_WAIT;
       }
       break;
     case CMD_INPUT_PRESSED:
       {
-        cmd_inp = CMD_WAIT;
         BellStart();
+        cmd_inp = CMD_WAIT;
       }
       break;
   }
@@ -314,27 +313,29 @@ void loop()
     case CMD_WAIT:
       break;
     case CMD_BUTTON_CHANGE:
-      cmd = CMD_WAIT;
-      int currentState = digitalRead(SONOFF_BUTTON);
-      if (currentState != buttonState) {
-        if (buttonState == LOW && currentState == HIGH) {
-          long duration = millis() - startPress;
-          if (duration < 50) {
-            Serial.println("too short press - no action");
-          } else if (duration < 2000) {
-            Serial.println("short press - toggle relay");
-            toggle();
-          } else if (duration < 10000) {
-            Serial.println("medium press - reset");
-            restart();
-          } else if (duration < 60000) {
-            Serial.println("long press - reset settings");
-            reset();
+      {
+        int currentState = digitalRead(SONOFF_BUTTON);
+        if (currentState != buttonState) {
+          if (buttonState == LOW && currentState == HIGH) {
+            long duration = millis() - startPress;
+            if (duration < 50) {
+              Serial.println("too short press - no action");
+            } else if (duration < 2000) {
+              Serial.println("short press - toggle relay");
+              toggle();
+            } else if (duration < 10000) {
+              Serial.println("medium press - reset");
+              restart();
+            } else if (duration < 60000) {
+              Serial.println("long press - reset settings");
+              reset();
+            }
+          } else if (buttonState == HIGH && currentState == LOW) {
+            startPress = millis();
           }
-        } else if (buttonState == HIGH && currentState == LOW) {
-          startPress = millis();
+          buttonState = currentState;
         }
-        buttonState = currentState;
+        cmd = CMD_WAIT;
       }
       break;
   }
