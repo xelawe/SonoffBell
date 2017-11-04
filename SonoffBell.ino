@@ -100,11 +100,11 @@ void setState(int s) {
   digitalWrite(PIN_RELAY, relayState);
   if (relayState == relStateOFF) {
     digitalWrite(PIN_LED, LEDStateOFF);
-    client.publish(mqtt_pubtopic_rl, "0", true);
+    //client.publish(mqtt_pubtopic_rl, "0", true);
   }
   else {
     digitalWrite(PIN_LED, LEDStateON);
-    client.publish(mqtt_pubtopic_rl, "1", true);
+    //client.publish(mqtt_pubtopic_rl, "1", true);
   }
 
 }
@@ -190,7 +190,7 @@ void BellStart() {
   // start Ticker to turn off Bell Relay
   TickerBell.attach_ms(700, BellStop);
 
-  client.publish(mqtt_pubtopic_bell, "1", true);
+  //client.publish(mqtt_pubtopic_bell, "1", true);
 
 }
 
@@ -214,6 +214,7 @@ void BellTurnOff() {
   }
 
   BellStarted = false;
+  client.publish(mqtt_pubtopic_bell, "1", true);
   client.publish(mqtt_pubtopic_bell, "0", true);
 }
 
