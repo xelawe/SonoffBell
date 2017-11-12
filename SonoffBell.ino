@@ -29,7 +29,7 @@
 
 */
 
-#define serdebug
+//#define serdebug
 #ifdef serdebug
 #define DebugPrint(...) {  Serial.print(__VA_ARGS__); }
 #define DebugPrintln(...) {  Serial.println(__VA_ARGS__); }
@@ -83,6 +83,7 @@ static long startPress = 0;
 boolean BellStarted = false;
 boolean BellMute = false;
 boolean TurnBellOff = false;
+boolean gv_check_net = false;
 
 void tick()
 {
@@ -225,6 +226,12 @@ void BellUnmute() {
   BellMute = false;
 }
 
+void tick_net_checks() {
+
+  gv_check_net = true;
+
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -260,6 +267,8 @@ void setup()
 
   turnOff();
 
+  ticker.attach(2, tick_net_checks);
+
   Serial.println("done setup");
 
 }
@@ -268,46 +277,55 @@ void setup()
 void loop()
 {
 
-  check_ota();
+// Check Network only, if Bell not started
+if (BellStarted == false){
+  
+  if (gv_check_net == true) {
+    check_ota();
 
-  check_mqtt();
+    check_mqtt();
+
+    gv_check_net = false;
+  }
+
+}
 
   if (TurnBellOff == true) {
     TurnBellOff = false;
     BellTurnOff();
   }
 
-  //  // Button pressed -> start Bell
-  switch (cmd_inp) {
-    case CMD_WAIT:
-      break;
-    case CMD_INPUT_CHANGE:
-      {
-        int currentStateInp = digitalRead(PIN_INPUT);
-        if (currentStateInp != InputState) {
-          InputState = currentStateInp;
-
-          if (InputState == inpStatePressed) {
-            BellStart();
-          }
-
-          if (InputState == inpStatePressed) {
-            //client.publish(mqtt_pubtopic_wl, "0", true);
-          }
-          else {
-            //client.publish(mqtt_pubtopic_wl, "1", true);
-          }
-        }
-        cmd_inp = CMD_WAIT;
-      }
-      break;
-    case CMD_INPUT_PRESSED:
-      {
-        BellStart();
-        cmd_inp = CMD_WAIT;
-      }
-      break;
-  }
+//  //  // Button pressed -> start Bell
+//  switch (cmd_inp) {
+//    case CMD_WAIT:
+//      break;
+//    case CMD_INPUT_CHANGE:
+//      {
+//        int currentStateInp = digitalRead(PIN_INPUT);
+//        if (currentStateInp != InputState) {
+//          InputState = currentStateInp;
+//
+//          if (InputState == inpStatePressed) {
+//            BellStart();
+//          }
+//
+//          if (InputState == inpStatePressed) {
+//            //client.publish(mqtt_pubtopic_wl, "0", true);
+//          }
+//          else {
+//            //client.publish(mqtt_pubtopic_wl, "1", true);
+//          }
+//        }
+//        cmd_inp = CMD_WAIT;
+//      }
+//      break;
+//    case CMD_INPUT_PRESSED:
+//      {
+//        BellStart();
+//        cmd_inp = CMD_WAIT;
+//      }
+//      break;
+//  }
 
 
   switch (cmd) {
