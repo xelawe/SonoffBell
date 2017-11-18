@@ -129,6 +129,7 @@ void toggleInput() {
 void setInputPressed() {
   cmd_inp = CMD_INPUT_PRESSED;
   InputState = inpStatePressed;
+  BellStart();
 }
 
 void toggle() {
@@ -227,9 +228,7 @@ void BellUnmute() {
 }
 
 void tick_net_checks() {
-
   gv_check_net = true;
-
 }
 
 void setup()
@@ -277,55 +276,55 @@ void setup()
 void loop()
 {
 
-// Check Network only, if Bell not started
-if (BellStarted == false){
-  
-  if (gv_check_net == true) {
-    check_ota();
+  // Check Network only, if Bell not started
+  if (BellStarted == false) {
 
-    check_mqtt();
+    if (gv_check_net == true) {
+      check_ota();
 
-    gv_check_net = false;
+      check_mqtt();
+
+      gv_check_net = false;
+    }
+
   }
-
-}
 
   if (TurnBellOff == true) {
     TurnBellOff = false;
     BellTurnOff();
   }
 
-//  //  // Button pressed -> start Bell
-//  switch (cmd_inp) {
-//    case CMD_WAIT:
-//      break;
-//    case CMD_INPUT_CHANGE:
-//      {
-//        int currentStateInp = digitalRead(PIN_INPUT);
-//        if (currentStateInp != InputState) {
-//          InputState = currentStateInp;
-//
-//          if (InputState == inpStatePressed) {
-//            BellStart();
-//          }
-//
-//          if (InputState == inpStatePressed) {
-//            //client.publish(mqtt_pubtopic_wl, "0", true);
-//          }
-//          else {
-//            //client.publish(mqtt_pubtopic_wl, "1", true);
-//          }
-//        }
-//        cmd_inp = CMD_WAIT;
-//      }
-//      break;
-//    case CMD_INPUT_PRESSED:
-//      {
-//        BellStart();
-//        cmd_inp = CMD_WAIT;
-//      }
-//      break;
-//  }
+  // Button pressed -> start Bell
+  switch (cmd_inp) {
+    case CMD_WAIT:
+      break;
+    case CMD_INPUT_CHANGE:
+      {
+        int currentStateInp = digitalRead(PIN_INPUT);
+        if (currentStateInp != InputState) {
+          InputState = currentStateInp;
+
+          if (InputState == inpStatePressed) {
+            //BellStart();
+          }
+
+          if (InputState == inpStatePressed) {
+            //client.publish(mqtt_pubtopic_wl, "0", true);
+          }
+          else {
+            //client.publish(mqtt_pubtopic_wl, "1", true);
+          }
+        }
+        cmd_inp = CMD_WAIT;
+      }
+      break;
+    case CMD_INPUT_PRESSED:
+      {
+        //BellStart();
+        cmd_inp = CMD_WAIT;
+      }
+      break;
+  }
 
 
   switch (cmd) {
