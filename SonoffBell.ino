@@ -237,6 +237,15 @@ void setup()
 
   DebugPrintln("\n" + String(__DATE__) + ", " + String(__TIME__) + " " + String(__FILE__));
 
+  //setup relay
+  pinMode(SONOFF_RELAY, OUTPUT);
+
+  //setup input
+  pinMode(SONOFF_INPUT, INPUT_PULLUP);
+  InputState = digitalRead(SONOFF_INPUT);
+  //attachInterrupt(SONOFF_INPUT, toggleInput, CHANGE);
+  attachInterrupt(SONOFF_INPUT, setInputPressed, FALLING);
+
   //set led pin as output
   pinMode(SONOFF_LED, OUTPUT);
   // start ticker with 0.5 because we start in AP mode and try to connect
@@ -252,15 +261,6 @@ void setup()
   //setup button
   pinMode(SONOFF_BUTTON, INPUT);
   attachInterrupt(SONOFF_BUTTON, toggleState, CHANGE);
-
-  //setup relay
-  pinMode(SONOFF_RELAY, OUTPUT);
-
-  //setup input
-  pinMode(SONOFF_INPUT, INPUT_PULLUP);
-  InputState = digitalRead(SONOFF_INPUT);
-  //attachInterrupt(SONOFF_INPUT, toggleInput, CHANGE);
-  attachInterrupt(SONOFF_INPUT, setInputPressed, FALLING);
 
   init_mqtt(callback_mqtt);
 
