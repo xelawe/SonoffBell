@@ -14,7 +14,7 @@ boolean volatile bell_triggered = false;
 int buttonState = HIGH;
 
 static long startPress = 0;
-boolean BellStarted = false;
+boolean volatile BellStarted = false;
 boolean BellMute = false;
 boolean TurnBellOff = false;
 
