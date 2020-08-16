@@ -1,4 +1,4 @@
-#include "cy_mqtt.h"
+#include "cy_mqtt_v1.h"
 
 char gv_stopic_bell[MQTT_TOPSZ];
 char gv_stopic_rl[MQTT_TOPSZ];
