@@ -8,6 +8,7 @@
 Ticker TickerBell;
 
 int volatile relayState = relStateOFF;
+boolean volatile bell_triggered = false;
 
 //inverted button state
 int buttonState = HIGH;
@@ -27,11 +28,9 @@ void ICACHE_RAM_ATTR setState(int s) {
   digitalWrite(PIN_RELAY, relayState);
   if (relayState == relStateOFF) {
     digitalWrite(PIN_LED, LEDStateOFF);
-    //client.publish(mqtt_pubtopic_rl, "0", true);
   }
   else {
     digitalWrite(PIN_LED, LEDStateON);
-    //client.publish(mqtt_pubtopic_rl, "1", true);
   }
 
 }
@@ -75,8 +74,6 @@ void BellTurnOff() {
 
   BellStarted = false;
 
-  pub_bell(1);
-  pub_bell(0);
 }
 
 void ICACHE_RAM_ATTR BellStart() {
@@ -91,19 +88,20 @@ void ICACHE_RAM_ATTR BellStart() {
   }
 
   BellStarted = true;
+  bell_triggered = true;
+  
   // turn Bell Relay on
   turnOn();
 
   // start Ticker to turn off Bell Relay
   TickerBell.attach_ms(700, BellStop);
 
-  //client.publish(mqtt_pubtopic_bell, "1", true);
-
 }
 
 void ICACHE_RAM_ATTR setInputPressed() {
 
   BellStart();
+  
 }
 
 void init_bell() {
@@ -118,3 +116,16 @@ void init_bell() {
 
   attachInterrupt(SONOFF_INPUT, setInputPressed, FALLING);
 }
+
+void check_bell() {
+  if (TurnBellOff == true) {
+    TurnBellOff = false;
+    BellTurnOff();
+  }
+
+  if (bell_triggered == true ) {
+    pub_bell(1);
+    bell_triggered = false;
+  }
+}
+

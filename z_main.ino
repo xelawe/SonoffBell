@@ -15,11 +15,7 @@ void loop()
 
   }
 
-  if (TurnBellOff == true) {
-    TurnBellOff = false;
-    BellTurnOff();
-  }
-
+  check_bell( );
 
   check_btn();
 

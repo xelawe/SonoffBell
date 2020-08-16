@@ -1,14 +1,5 @@
 #include "cy_mqtt.h"
 
-//const char* mqtt_subtopic_rl = "ATSH28/UG/G1/RL/1/set";
-const char* mqtt_pubtopic_rl = "ATSH28/UG/G1/RL/1/state";
-
-const char* mqtt_pubtopic = "ATSH28/UG/G1/SW/1/set";
-
-//const char* mqtt_subtopic_bell = "ATSH28/UG/G1/BELL/1/set";
-const char* mqtt_pubtopic_bell = "ATSH28/UG/G1/BELL/1/state";
-
-
 char gv_stopic_bell[MQTT_TOPSZ];
 char gv_stopic_rl[MQTT_TOPSZ];
 const char gc_stopic_bell[] PROGMEM = "bell";
@@ -22,8 +13,8 @@ char gv_pbuffer[5];// buffer for reading the string to (needs to be large enough
 
 const char gc_cmd_off[] PROGMEM = "off";
 const char gc_cmd_on[] PROGMEM = "on";
-const char gc_cmd_stop[] PROGMEM = "stop";
-const char* const gt_cmd[] PROGMEM = { gc_cmd_off, gc_cmd_on, gc_cmd_stop };
+const char gc_cmd_mute[] PROGMEM = "mute";
+const char* const gt_cmd[] PROGMEM = { gc_cmd_off, gc_cmd_on, gc_cmd_mute };
 
 char *get_stopic_ix( int ix ) {
   strcpy_P(gv_sbuffer, (char*)pgm_read_dword(&(gt_stopic[ix])));
@@ -71,16 +62,11 @@ void init_mqtt_local( ) {
 }
 
 void pub_bell(int cmd) {
-  //client.publish(mqtt_pubtopic_bell, iv_state, true);
-  //client.publish(mqtt_pubtopic_bell, "0", true);
 
-  if (!client.publish(mqtt_GetTopic_P(gv_ptopic, 1, gv_clientname, get_stopic_ix(0)), get_cmd_ix(cmd), true)) {
+  if (!client.publish(mqtt_GetTopic_P(gv_ptopic, 1, gv_clientname, get_stopic_ix(0)), get_cmd_ix(cmd), false)) {
     DebugPrintln(F("pub failed!"));
   } else {
     DebugPrintln(F("pub ok!"));
   }
 }
 
-void pub_mqtt_toggle() {
-  client.publish(mqtt_pubtopic, "2");
-}
