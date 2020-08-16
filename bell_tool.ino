@@ -75,8 +75,8 @@ void BellTurnOff() {
 
   BellStarted = false;
 
-  pub_bell("1");
-  pub_bell("0");
+  pub_bell(1);
+  pub_bell(0);
 }
 
 void ICACHE_RAM_ATTR BellStart() {
@@ -106,7 +106,13 @@ void ICACHE_RAM_ATTR setInputPressed() {
   BellStart();
 }
 
-void init_input() {
+void init_bell() {
+
+  //setup relay
+  pinMode(SONOFF_RELAY, OUTPUT);
+
+  turnOff();
+
   //setup input
   pinMode(SONOFF_INPUT, INPUT_PULLUP);
 

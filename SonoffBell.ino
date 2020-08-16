@@ -29,7 +29,7 @@
 
 */
 
-#define USE_SERIAL Serial
+//#define USE_SERIAL Serial
 #include <cy_serdebug.h>
 #include <cy_serial.h>
 
@@ -70,14 +70,9 @@ void tick()
 
 void setup()
 {
-  Serial.begin(115200);
+  cy_serial::start(__FILE__);
 
-  DebugPrintln("\n" + String(__DATE__) + ", " + String(__TIME__) + " " + String(__FILE__));
-
-  //setup relay
-  pinMode(SONOFF_RELAY, OUTPUT);
-
-  init_input( );
+  init_bell( );
 
   //set led pin as output
   pinMode(SONOFF_LED, OUTPUT);
@@ -98,8 +93,6 @@ void setup()
 
   //init_mqtt(callback_mqtt);
   init_mqtt_local( );
-
-  turnOff();
 
   ticker.attach(2, tick_net_checks);
 

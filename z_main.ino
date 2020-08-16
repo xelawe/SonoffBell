@@ -23,7 +23,6 @@ void loop()
 
   check_btn();
 
-  //  check_time();
   delay(100);
 
 }
